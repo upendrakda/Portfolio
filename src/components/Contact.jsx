@@ -1,4 +1,16 @@
+import { useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
 import { DATA } from "../data/portfolioData";
+
+// ─── YOUR EMAILJS CREDENTIALS HERE ────────────────────
+const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;   // EmailJS > Email Services
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;  // EmailJS > Email Templates
+const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY; // EmailJS > Account > Public Key
+
+// const EMAILJS_SERVICE_ID  = "service_invj8pf";
+// const EMAILJS_TEMPLATE_ID = "template_iaggokf";
+// const EMAILJS_PUBLIC_KEY  = "UceZ24aF3AHwmlGdM";
+// ────────────────────────────────────────────────────────────
 
 const contactLinks = [
   { icon: "✉",  sub: "Email",    key: "email",    href: (v) => `mailto:${v}` },
@@ -7,9 +19,27 @@ const contactLinks = [
 ];
 
 export default function Contact() {
-  const handleSubmit = (e) => {
+  const formRef = useRef(null);
+  const [status, setStatus] = useState("idle"); // idle | sending | success | error
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Message sent! (connect a form service like EmailJS or Formspree to make this real)");
+    setStatus("sending");
+    try {
+      await emailjs.sendForm(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        formRef.current,
+        EMAILJS_PUBLIC_KEY
+      );
+      setStatus("success");
+      formRef.current.reset();
+      setTimeout(() => setStatus("idle"), 4000);
+    } catch (err) {
+      console.error("EmailJS error:", err);
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 4000);
+    }
   };
 
   return (
@@ -29,7 +59,6 @@ export default function Contact() {
             Open to freelance projects, full-time roles, and interesting conversations.
             If you're building something that matters, I want to hear about it.
           </p>
-
           {contactLinks.map(({ icon, sub, key, href }) => (
             <a
               key={key}
@@ -50,18 +79,28 @@ export default function Contact() {
         </div>
 
         {/* Right: form */}
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form ref={formRef} className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField label="Name"  type="text"  placeholder="Your name" />
-            <FormField label="Email" type="email" placeholder="you@email.com" />
+            <FormField label="Name"    name="from_name"  type="text"  placeholder="Your name"         required />
+            <FormField label="Email"   name="from_email" type="email" placeholder="you@email.com"     required />
           </div>
-          <FormField label="Subject" type="text" placeholder="What's this about?" />
-          <FormField label="Message" as="textarea" placeholder="Tell me about your project or idea..." rows={5} />
+          <FormField   label="Subject" name="subject"    type="text"  placeholder="What's this about?" required />
+          <FormField   label="Message" name="message"    as="textarea" placeholder="Tell me about your project..." rows={5} required />
+
           <button
             type="submit"
-            className="self-start px-7 py-3 bg-[#c8f135] text-[#0d0d0d] text-xs font-extrabold uppercase tracking-widest rounded-lg hover:opacity-90 hover:-translate-y-px transition-all active:scale-95"
+            disabled={status === "sending"}
+            className={`self-start px-7 py-3 text-xs font-extrabold uppercase tracking-widest rounded-lg transition-all active:scale-95
+              ${status === "idle"    ? "bg-[#c8f135] text-[#0d0d0d] hover:opacity-90 hover:-translate-y-px" : ""}
+              ${status === "sending" ? "bg-white/20 text-white/40 cursor-not-allowed" : ""}
+              ${status === "success" ? "bg-[#c8f135]/20 text-[#c8f135] cursor-default" : ""}
+              ${status === "error"   ? "bg-red-500/20 text-red-400 cursor-default" : ""}
+            `}
           >
-            Send it ↗
+            {status === "idle"    && "Send it ↗"}
+            {status === "sending" && "Sending…"}
+            {status === "success" && "✓ Sent successfully!"}
+            {status === "error"   && "✗ Failed — try again"}
           </button>
         </form>
       </div>
@@ -71,16 +110,11 @@ export default function Contact() {
 
 function FormField({ label, as = "input", ...props }) {
   const base =
-    "w-full bg-white/[0.04] border border-white/[0.08] text-[#f7f4ee] px-4 py-3 rounded-lg text-sm font-medium outline-none resize-none placeholder:text-white/20 focus:border-[#c8f135]/40 focus:bg-white/[0.06] transition-colors";
-
+    "w-full bg-white/4 border border-white/8 text-[#f7f4ee] px-4 py-3 rounded-lg text-sm font-medium outline-none resize-none placeholder:text-white/20 focus:border-[#c8f135]/40 focus:bg-white/[0.06] transition-colors";
   return (
     <div className="flex flex-col gap-2">
       <label className="text-[11px] font-bold uppercase tracking-widest text-white/30">{label}</label>
-      {as === "textarea" ? (
-        <textarea className={base} {...props} />
-      ) : (
-        <input className={base} {...props} />
-      )}
+      {as === "textarea" ? <textarea className={base} {...props} /> : <input className={base} {...props} />}
     </div>
   );
 }
