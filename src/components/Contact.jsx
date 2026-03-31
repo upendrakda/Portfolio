@@ -6,10 +6,6 @@ import { DATA } from "../data/portfolioData";
 const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;   // EmailJS > Email Services
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;  // EmailJS > Email Templates
 const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY; // EmailJS > Account > Public Key
-
-// const EMAILJS_SERVICE_ID  = "service_invj8pf";
-// const EMAILJS_TEMPLATE_ID = "template_iaggokf";
-// const EMAILJS_PUBLIC_KEY  = "UceZ24aF3AHwmlGdM";
 // ────────────────────────────────────────────────────────────
 
 const contactLinks = [
