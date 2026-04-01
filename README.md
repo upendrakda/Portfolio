@@ -3,7 +3,7 @@
 Welcome to my personal portfolio website!  
 This project showcases my skills, projects, and experience as a developer — built with a modern, responsive, and creative design.
 
-🔗 **Live Site:** https://
+🔗 **Live Site:** [khadkaupendra.com.np](https://khadkaupendra.com.np)
 
 ---
 
